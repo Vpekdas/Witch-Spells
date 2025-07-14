@@ -5,8 +5,6 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-
-
     [SerializeField] float _horizontalSpeed, _jumpSpeed, _wallJumpSpeed, _wallJumpHeight, _dashSpeed, _maxFallSpeed;
     [SerializeField] float _gravity;
     [SerializeField] float _wallJumpDuration;
@@ -15,7 +13,6 @@ public class PlayerController : MonoBehaviour
     private readonly float _fallMultiplier = 2.5f;
     private readonly float _coyoteTime = 0.15f;
     private readonly float _dashTime = 1.0f;
-
     private bool _isGrounded, _isWalled, _isWallJumping, _isJumping, _isDashing, _isFacingRight;
     private bool _jumpRequested, _jumpReleased, _dashRequested;
     private float _coyoteTimeCounter, _dashTimeCounter, _wallJumpTimer;
@@ -25,6 +22,10 @@ public class PlayerController : MonoBehaviour
     private Animator _animator;
     private InputAction _dash;
     private Vector2 _velocity;
+
+    public bool IsFacingRight => _isFacingRight;
+    public float MaxFallSpeed => _maxFallSpeed;
+    public Vector2 Velocity => _velocity;
 
     private void Awake()
     {
@@ -47,7 +48,6 @@ public class PlayerController : MonoBehaviour
         _wallJumpTimer = 0.0f;
 
         _velocity = new Vector2();
-
     }
 
     private void Start()
@@ -55,7 +55,6 @@ public class PlayerController : MonoBehaviour
         // New input system.
         _dash = InputSystem.actions.FindAction("Dash");
     }
-
 
     // TODO: Use the new Input system
     private void Update()
@@ -89,9 +88,9 @@ public class PlayerController : MonoBehaviour
         {
             _velocity.x = 0.0f;
         }
+
         _coyoteTimeCounter -= Time.fixedDeltaTime;
 
-        // Coyote timer
         if (_isGrounded)
         {
             _isJumping = false;
@@ -114,11 +113,10 @@ public class PlayerController : MonoBehaviour
 
         if (!_isWalled)
         {
-            // Run
             Run(1.0f);
         }
 
-        // Handle jump
+        // Handle jump with Coyote Timer
         if (_jumpRequested && _coyoteTimeCounter > 0.0f)
         {
             Jump();
@@ -166,6 +164,10 @@ public class PlayerController : MonoBehaviour
         {
             _isGrounded = true;
             _velocity.y = 0.0f;
+        }
+        else
+        {
+            _isGrounded = false;
         }
 
         // https://www.gamedev.net/forums/topic/632771-how-can-my-program-detect-if-the-player-hits-a-wallfloor-ceiling/
