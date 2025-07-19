@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -21,11 +23,17 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D.SlideResults _slideResults;
     private Animator _animator;
     private InputAction _dash;
+    private InputAction _firstSpell;
+    private InputAction _shieldSpell;
+
+
     private Vector2 _velocity;
 
     public bool IsFacingRight => _isFacingRight;
     public float MaxFallSpeed => _maxFallSpeed;
     public Vector2 Velocity => _velocity;
+    public SpellPooler SpellPooler;
+
 
     private void Awake()
     {
@@ -54,6 +62,8 @@ public class PlayerController : MonoBehaviour
     {
         // New input system.
         _dash = InputSystem.actions.FindAction("Dash");
+        _firstSpell = InputSystem.actions.FindAction("First Spell");
+        _shieldSpell = InputSystem.actions.FindAction("Shield");
     }
 
     // TODO: Use the new Input system
@@ -67,6 +77,11 @@ public class PlayerController : MonoBehaviour
                 Turn();
             }
         }
+        PlayerInput();
+    }
+
+    private void PlayerInput()
+    {
         if (Input.GetButtonDown("Jump"))
         {
             _jumpRequested = true;
@@ -79,6 +94,14 @@ public class PlayerController : MonoBehaviour
         if (_dash.WasCompletedThisFrame())
         {
             _dashRequested = true;
+        }
+        if (_firstSpell.WasCompletedThisFrame())
+        {
+            CastSpell("FireBall");
+        }
+        if (_shieldSpell.WasCompletedThisFrame())
+        {
+            CastSpell("Shield");
         }
     }
 
@@ -248,5 +271,23 @@ public class PlayerController : MonoBehaviour
         Vector3 scale = transform.localScale;
         scale.x *= -1;
         transform.localScale = scale;
+    }
+
+    private void CastSpell(string spellType)
+    {
+        Spell spell = SpellPooler.s_Instance.GetPoolerSpell(spellType);
+        if (spell != null)
+        {
+            spell.Object.SetActive(true);
+            spell.Type.Direction = _isFacingRight ? Vector2.right : Vector2.left;
+            Vector3 scale = spell.Type.Scale;
+            scale.x = _isFacingRight ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
+            spell.Type.Scale = scale;
+            spell.Type.Position = transform.position;
+        }
+        else
+        {
+            Debug.Log(spellType = " was not found");
+        }
     }
 }
