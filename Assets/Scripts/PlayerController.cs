@@ -28,7 +28,6 @@ public class PlayerController : MonoBehaviour
 
 
     private Vector2 _velocity;
-
     public bool IsFacingRight => _isFacingRight;
     public float MaxFallSpeed => _maxFallSpeed;
     public Vector2 Velocity => _velocity;

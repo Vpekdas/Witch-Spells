@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class Spell
@@ -24,7 +23,6 @@ public class SpellPooler : MonoBehaviour
             return;
         }
         s_Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
