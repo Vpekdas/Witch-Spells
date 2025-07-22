@@ -284,9 +284,5 @@ public class PlayerController : MonoBehaviour
             spell.Type.Scale = scale;
             spell.Type.Position = transform.position;
         }
-        else
-        {
-            Debug.Log(spellType = " was not found");
-        }
     }
 }

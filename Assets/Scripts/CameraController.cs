@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    // TODO: Make these variable to serialized field ?
     private readonly float _smoothSpeed = 0.125f;
     private readonly float _offsetSmoothSpeed = 0.2f;
     private readonly float _horizontalOffsetAmount = 0.5f;

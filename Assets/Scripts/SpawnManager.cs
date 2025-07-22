@@ -3,20 +3,25 @@ using UnityEngine;
 public class SpawnManager : MonoBehaviour
 {
     [SerializeField] private EnemyPooler _enemyPooler;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
+    [SerializeField] private GameObject[] _spawnPointsObj;
 
+    // Register all spawn point events
+    private void Awake()
+    {
+        for (int i = 0; i < _spawnPointsObj.Length; i++)
+        {
+            SpawnPoint spawnPoint = _spawnPointsObj[i].GetComponent<SpawnPoint>();
+            spawnPoint.OnReadyToSpawn += SpawnEnemy;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void SpawnEnemy(SpawnPoint spawnPoint)
     {
         Enemy enemy = _enemyPooler.GetPoolerEnemy("Green Slime");
         if (enemy != null)
         {
+            enemy.Object.transform.position = spawnPoint.transform.position;
             enemy.Object.SetActive(true);
-            enemy.Type.Position = Vector3.zero;
         }
     }
 }

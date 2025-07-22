@@ -58,7 +58,9 @@ public class EnemyPooler : MonoBehaviour
             foreach (Enemy enemy in enemies)
             {
                 if (!enemy.Object.activeInHierarchy)
+                {
                     return enemy;
+                }
             }
         }
         return null;
