@@ -193,6 +193,7 @@ MonoBehaviour:
   _damage: 3
   _speed: 3
   _gravity: 9.81
+  _maxHealth: 10
   _slideMovement:
     <maxIterations>k__BackingField: 3
     <surfaceSlideAngle>k__BackingField: 45

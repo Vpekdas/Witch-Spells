@@ -1,12 +1,14 @@
+using System;
 using UnityEngine;
 
 public class GreenSlime : MonoBehaviour, IEnemy
 {
     [SerializeField] private string _type;
-    [SerializeField] private float _damage, _speed, _gravity;
+    [SerializeField] private float _damage, _speed, _gravity, _maxHealth;
     [SerializeField] Rigidbody2D.SlideMovement _slideMovement;
 
     private bool _isGrounded, _isFacingRight;
+    private float _health;
     private Vector2 _velocity;
     private Rigidbody2D _rb2D;
     private Rigidbody2D.SlideResults _slideResults;
@@ -15,6 +17,7 @@ public class GreenSlime : MonoBehaviour, IEnemy
     public float Damage { get => _damage; set => _damage = value; }
     public float Speed { get => _speed; set => _speed = value; }
     public float Gravity { get => _gravity; set => _gravity = value; }
+    public float Health { get => _health; set => _health = value; }
     public bool IsGrounded { get => _isGrounded; set => _isGrounded = value; }
     public Vector2 Velocity { get => _velocity; set => _velocity = value; }
     public Vector3 Position { get => transform.position; set => transform.position = value; }
@@ -79,7 +82,28 @@ public class GreenSlime : MonoBehaviour, IEnemy
     {
         if (collision.CompareTag("Spell"))
         {
-            gameObject.SetActive(false);
+            ISpell spell = collision.GetComponent<ISpell>();
+            _health -= spell.Damage;
+            if (_health <= 0.0f)
+            {
+                gameObject.SetActive(false);
+            }
+            if (spell.Type == "Shield")
+            {
+                float direction = _isFacingRight ? -1.0f : 1.0f;
+                float knockbackStrength = 5.0f;
+                _velocity.x = knockbackStrength * direction;
+            }
         }
     }
+
+    private void OnEnable()
+    {
+        _velocity = Vector2.zero;
+        _health = _maxHealth;
+        _isGrounded = true;
+        _isFacingRight = true;
+    }
+
 }
+

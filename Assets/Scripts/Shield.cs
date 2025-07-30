@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class Shield : MonoBehaviour, ISpell
 {
-    [SerializeField] private float _damage;
-    [SerializeField] private float _speed;
+    [SerializeField] private float _damage, _speed;
     [SerializeField] private string _type;
     private Vector2 _direction;
 
@@ -18,5 +17,4 @@ public class Shield : MonoBehaviour, ISpell
     {
         gameObject.SetActive(false);
     }
-
 }
