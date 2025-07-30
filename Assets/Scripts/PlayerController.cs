@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,10 +11,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _gravity;
     [SerializeField] float _wallJumpDuration;
     [SerializeField] float _groundAccel, _groundDeccel, _airAccel, _airDeccel;
+    [SerializeField] float _health;
     [SerializeField] Rigidbody2D.SlideMovement _slideMovement;
+    [SerializeField] private GameObject _portal;
+
     private readonly float _fallMultiplier = 2.5f;
     private readonly float _coyoteTime = 0.15f;
     private readonly float _dashTime = 1.0f;
+
     private bool _isGrounded, _isWalled, _isWallJumping, _isJumping, _isDashing, _isFacingRight;
     private bool _jumpRequested, _jumpReleased, _dashRequested;
     private float _coyoteTimeCounter, _dashTimeCounter, _wallJumpTimer;
@@ -20,12 +26,14 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D _rb2D;
     private Rigidbody2D.SlideResults _slideResults;
     private Animator _animator;
-    private InputAction _dash;
+    private InputAction _dash, _firstSpell, _shieldSpell;
     private Vector2 _velocity;
 
     public bool IsFacingRight => _isFacingRight;
     public float MaxFallSpeed => _maxFallSpeed;
     public Vector2 Velocity => _velocity;
+    public SpellPooler SpellPooler;
+
 
     private void Awake()
     {
@@ -54,6 +62,8 @@ public class PlayerController : MonoBehaviour
     {
         // New input system.
         _dash = InputSystem.actions.FindAction("Dash");
+        _firstSpell = InputSystem.actions.FindAction("First Spell");
+        _shieldSpell = InputSystem.actions.FindAction("Shield");
     }
 
     // TODO: Use the new Input system
@@ -67,6 +77,11 @@ public class PlayerController : MonoBehaviour
                 Turn();
             }
         }
+        PlayerInput();
+    }
+
+    private void PlayerInput()
+    {
         if (Input.GetButtonDown("Jump"))
         {
             _jumpRequested = true;
@@ -79,6 +94,14 @@ public class PlayerController : MonoBehaviour
         if (_dash.WasCompletedThisFrame())
         {
             _dashRequested = true;
+        }
+        if (_firstSpell.WasCompletedThisFrame())
+        {
+            CastSpell("FireBall");
+        }
+        if (_shieldSpell.WasCompletedThisFrame())
+        {
+            CastSpell("Shield");
         }
     }
 
@@ -186,7 +209,7 @@ public class PlayerController : MonoBehaviour
                 _slideMovement.gravity = new Vector2(0.0f, -1.0f);
                 _velocity.y = 0.0f;
                 _isWalled = true;
-                if (_jumpRequested)
+                if (_jumpRequested && !_isGrounded)
                 {
                     WallJump(normal.x);
                 }
@@ -249,4 +272,36 @@ public class PlayerController : MonoBehaviour
         scale.x *= -1;
         transform.localScale = scale;
     }
+
+    private void CastSpell(string spellType)
+    {
+        Spell spell = SpellPooler.s_Instance.GetPoolerSpell(spellType);
+        if (spell != null)
+        {
+            if (spell.Type.Type != "Shield")
+            {
+                _portal.SetActive(true);
+            }
+            spell.Object.SetActive(true);
+            spell.Type.Direction = _isFacingRight ? Vector2.right : Vector2.left;
+            Vector3 scale = spell.Type.Scale;
+            scale.x = _isFacingRight ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
+            spell.Type.Scale = scale;
+            spell.Type.Position = _portal.transform.position;
+        }
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        GameObject obj = collision.gameObject;
+        if (obj.CompareTag("Enemy"))
+        {
+            _health -= obj.GetComponent<IEnemy>().Damage;
+            if (_health <= 0.0f)
+            {
+                Debug.Log("You died !");
+            }
+        }
+    }
+
+
 }

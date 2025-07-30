@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public PlayerController Player;
+    // TODO: Make these variable to serialized field ?
     private readonly float _smoothSpeed = 0.125f;
     private readonly float _offsetSmoothSpeed = 0.2f;
     private readonly float _horizontalOffsetAmount = 0.5f;
@@ -13,6 +13,7 @@ public class CameraController : MonoBehaviour
     private Vector3 _targetHorizontalOffset;
     private Vector3 _currentVerticalOffset;
     private Vector3 _targetVerticalOffset;
+    public PlayerController Player;
 
     private void Awake()
     {
