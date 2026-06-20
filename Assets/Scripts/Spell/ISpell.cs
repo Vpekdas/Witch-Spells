@@ -1,8 +1,15 @@
 using UnityEngine;
 
+public enum SpellType
+{
+    FireBall,
+    Shield
+
+}
+
 public interface ISpell
 {
-    string Type { get; set; }
+    SpellType Type { get; set; }
     float Damage { get; set; }
     Vector3 Position { get; set; }
     Vector2 Direction { get; set; }

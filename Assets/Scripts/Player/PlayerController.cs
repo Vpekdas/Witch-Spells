@@ -1,12 +1,13 @@
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
+    private static readonly int s_VelocityHash = Animator.StringToHash("Velocity");
+
     [SerializeField] float _horizontalSpeed, _jumpSpeed, _wallJumpSpeed, _wallJumpHeight, _dashSpeed, _maxFallSpeed;
     [SerializeField] float _gravity;
     [SerializeField] float _wallJumpDuration;
@@ -14,6 +15,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _health;
     [SerializeField] Rigidbody2D.SlideMovement _slideMovement;
     [SerializeField] private GameObject _portal;
+
 
     private readonly float _fallMultiplier = 2.5f;
     private readonly float _coyoteTime = 0.15f;
@@ -26,17 +28,21 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D _rb2D;
     private Rigidbody2D.SlideResults _slideResults;
     private Animator _animator;
-    private InputAction _dash, _firstSpell, _shieldSpell;
     private Vector2 _velocity;
 
     public bool IsFacingRight => _isFacingRight;
     public float MaxFallSpeed => _maxFallSpeed;
     public Vector2 Velocity => _velocity;
     public SpellPooler SpellPooler;
+    private InputSystem_Actions _input;
 
 
     private void Awake()
     {
+        _input = new InputSystem_Actions();
+        _input.Player.Enable();
+
+
         _rb2D = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
 
@@ -58,50 +64,46 @@ public class PlayerController : MonoBehaviour
         _velocity = new Vector2();
     }
 
-    private void Start()
-    {
-        // New input system.
-        _dash = InputSystem.actions.FindAction("Dash");
-        _firstSpell = InputSystem.actions.FindAction("First Spell");
-        _shieldSpell = InputSystem.actions.FindAction("Shield");
-    }
 
-    // TODO: Use the new Input system
     private void Update()
     {
-        _horizontalInput = Input.GetAxis("Horizontal");
+        _horizontalInput = _input.Player.Move.ReadValue<Vector2>().x;
+
         if (_horizontalInput != 0)
         {
-            if (_isFacingRight != IsMovingRight())
+            bool wantsRight = _horizontalInput > 0;
+
+            if (_isFacingRight != wantsRight)
             {
                 Turn();
             }
         }
+
         PlayerInput();
     }
 
     private void PlayerInput()
     {
-        if (Input.GetButtonDown("Jump"))
+        if (_input.Player.Jump.WasPressedThisFrame())
         {
             _jumpRequested = true;
             _jumpReleased = false;
         }
-        if (Input.GetButtonUp("Jump"))
+        if (_input.Player.Jump.WasReleasedThisFrame())
         {
             _jumpReleased = true;
         }
-        if (_dash.WasCompletedThisFrame())
+        if (_input.Player.Dash.WasPressedThisFrame())
         {
             _dashRequested = true;
         }
-        if (_firstSpell.WasCompletedThisFrame())
+        if (_input.Player.FirstSpell.WasPressedThisFrame())
         {
-            CastSpell("FireBall");
+            CastSpell(SpellType.FireBall);
         }
-        if (_shieldSpell.WasCompletedThisFrame())
+        if (_input.Player.Shield.WasPressedThisFrame())
         {
-            CastSpell("Shield");
+            CastSpell(SpellType.Shield);
         }
     }
 
@@ -124,7 +126,6 @@ public class PlayerController : MonoBehaviour
             _dashTimeCounter += Time.fixedDeltaTime;
         }
 
-        // Wall jumping
         if (_isWallJumping)
         {
             _wallJumpTimer -= Time.fixedDeltaTime;
@@ -139,7 +140,7 @@ public class PlayerController : MonoBehaviour
             Run(1.0f);
         }
 
-        // Handle jump with Coyote Timer
+
         if (_jumpRequested && _coyoteTimeCounter > 0.0f)
         {
             Jump();
@@ -149,7 +150,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Short jump
+        // Short jump.
         if (_jumpReleased && _velocity.y > 0)
         {
             _velocity.y = 0.0f;
@@ -166,7 +167,6 @@ public class PlayerController : MonoBehaviour
             _animator.SetBool("isDashing", _isDashing);
         }
 
-        // Apply gravity
         if (!_isGrounded && !_isWalled && !_isWallJumping)
         {
             _velocity.y -= _gravity * Time.fixedDeltaTime;
@@ -179,41 +179,52 @@ public class PlayerController : MonoBehaviour
             _velocity.y = Math.Max(_velocity.y, -_maxFallSpeed);
         }
 
-        _animator.SetFloat("Velocity", Math.Abs(_velocity.x));
-        _slideResults = _rb2D.Slide(_velocity, Time.fixedDeltaTime, _slideMovement);
 
-        // Handle collision to surface (bottom)
-        if (_slideResults.surfaceHit)
-        {
-            _isGrounded = true;
-            _velocity.y = 0.0f;
-        }
-        else
-        {
-            _isGrounded = false;
-        }
+        _animator.SetFloat(s_VelocityHash, Math.Abs(_velocity.x));
+
+
+        _isGrounded = false;
+        _isWalled = false;
+
+        _slideResults = _rb2D.Slide(_velocity, Time.fixedDeltaTime, _slideMovement);
 
         // https://www.gamedev.net/forums/topic/632771-how-can-my-program-detect-if-the-player-hits-a-wallfloor-ceiling/
         if (_slideResults.slideHit)
         {
             Vector2 normal = _slideResults.slideHit.normal;
-            // Top collision
+
+            // If collision is too slope, don't climb.
+            float angle = Vector2.Angle(normal, Vector2.up);
+            if (angle > _slideMovement.surfaceSlideAngle)
+            {
+                _velocity.x = 0f;
+            }
+
+            // Top collision.
             if (normal.y < -0.7f)
             {
                 _velocity.y = 0.0f;
                 _isWalled = false;
             }
-            // Left / Right collision
+            // Bottom collision.
+            if (normal.y > 0.7f)
+            {
+                _isGrounded = true;
+                _velocity.y = 0.0f;
+            }
+            // Left / Right collision.
             if ((normal.x > 0.7 || normal.x < -0.7) && !_isGrounded)
             {
                 _slideMovement.gravity = new Vector2(0.0f, -1.0f);
                 _velocity.y = 0.0f;
                 _isWalled = true;
+
                 if (_jumpRequested && !_isGrounded)
                 {
                     WallJump(normal.x);
                 }
             }
+
         }
     }
     private void Jump()
@@ -255,15 +266,11 @@ public class PlayerController : MonoBehaviour
         _isDashing = true;
         _animator.SetBool("isDashing", _isDashing);
         _dashTimeCounter = 0.0f;
-        float direction = IsMovingRight() ? 1.0f : -1.0f;
+        float direction = _isFacingRight ? 1.0f : -1.0f;
         _velocity.x = _dashSpeed * direction;
         _dashRequested = false;
     }
 
-    private bool IsMovingRight()
-    {
-        return _velocity.x > 0.0f;
-    }
 
     private void Turn()
     {
@@ -273,12 +280,12 @@ public class PlayerController : MonoBehaviour
         transform.localScale = scale;
     }
 
-    private void CastSpell(string spellType)
+    private void CastSpell(SpellType spellType)
     {
         Spell spell = SpellPooler.s_Instance.GetPoolerSpell(spellType);
         if (spell != null)
         {
-            if (spell.Type.Type != "Shield")
+            if (spell.Type.Type != SpellType.Shield)
             {
                 _portal.SetActive(true);
             }

@@ -13,7 +13,7 @@ public class SpellPooler : MonoBehaviour
     [SerializeField] private int _spellAmountPerType;
     [SerializeField] private GameObject[] _spellsType;
     public static SpellPooler s_Instance;
-    private Dictionary<string, List<Spell>> _pooledSpells;
+    private Dictionary<SpellType, List<Spell>> _pooledSpells;
 
     private void Awake()
     {
@@ -27,10 +27,10 @@ public class SpellPooler : MonoBehaviour
 
     private void Start()
     {
-        _pooledSpells = new Dictionary<string, List<Spell>>();
+        _pooledSpells = new Dictionary<SpellType, List<Spell>>();
         for (int i = 0; i < _spellsType.Length; i++)
         {
-            string spellTypeName = _spellsType[i].GetComponent<ISpell>().Type;
+            SpellType spellTypeName = _spellsType[i].GetComponent<ISpell>().Type;
 
             if (!_pooledSpells.ContainsKey(spellTypeName))
                 _pooledSpells[spellTypeName] = new List<Spell>();
@@ -52,7 +52,7 @@ public class SpellPooler : MonoBehaviour
         }
     }
 
-    public Spell GetPoolerSpell(string spellType)
+    public Spell GetPoolerSpell(SpellType spellType)
     {
         if (_pooledSpells.TryGetValue(spellType, out List<Spell> spells))
         {

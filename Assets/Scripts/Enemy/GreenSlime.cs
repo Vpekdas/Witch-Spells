@@ -88,7 +88,7 @@ public class GreenSlime : MonoBehaviour, IEnemy
             {
                 gameObject.SetActive(false);
             }
-            if (spell.Type == "Shield")
+            if (spell.Type == SpellType.Shield)
             {
                 float direction = _isFacingRight ? -1.0f : 1.0f;
                 float knockbackStrength = 5.0f;
