@@ -2,11 +2,10 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    // TODO: Make these variable to serialized field ?
-    private readonly float _smoothSpeed = 0.125f;
-    private readonly float _offsetSmoothSpeed = 0.2f;
-    private readonly float _horizontalOffsetAmount = 0.5f;
-    private readonly float _maxFallYOffset = -5.0f;
+    private const float SMOOTH_SPEED = 0.125f;
+    private const float OFFSET_SMOOTH_SPEED = 0.2f;
+    private const float HORIZONTAL_OFFSET_AMOUNT = 0.5f;
+    private const float MAX_FALL_Y_OFFSET = -5.0f;
     private float _playerVelocityY;
     private Vector3 _velocity;
     private Vector3 _currentHorizontalOffset;
@@ -27,7 +26,7 @@ public class CameraController : MonoBehaviour
     private void Start()
     {
         _playerVelocityY = Player.Velocity.y;
-        float xOffset = Player.IsFacingRight ? _horizontalOffsetAmount : -_horizontalOffsetAmount;
+        float xOffset = Player.IsFacingRight ? HORIZONTAL_OFFSET_AMOUNT : -HORIZONTAL_OFFSET_AMOUNT;
         _targetHorizontalOffset = new Vector3(xOffset, 0.0f, 0.0f);
         _currentHorizontalOffset = _targetHorizontalOffset;
     }
@@ -42,23 +41,23 @@ public class CameraController : MonoBehaviour
         Vector3 playerPosition = Player.transform.position;
         Vector3 desiredPosition = playerPosition + HorizontalCameraOffset() + VerticalCameraOffset();
         desiredPosition.z = -1.0f;
-        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref _velocity, _smoothSpeed);
+        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref _velocity, SMOOTH_SPEED);
     }
 
     private Vector3 HorizontalCameraOffset()
     {
-        float xOffset = Player.IsFacingRight ? _horizontalOffsetAmount : -_horizontalOffsetAmount;
+        float xOffset = Player.IsFacingRight ? HORIZONTAL_OFFSET_AMOUNT : -HORIZONTAL_OFFSET_AMOUNT;
         _targetHorizontalOffset = new Vector3(xOffset, 0.0f, 0.0f);
-        _currentHorizontalOffset = Vector3.Lerp(_currentHorizontalOffset, _targetHorizontalOffset, _offsetSmoothSpeed);
+        _currentHorizontalOffset = Vector3.Lerp(_currentHorizontalOffset, _targetHorizontalOffset, OFFSET_SMOOTH_SPEED);
         return _currentHorizontalOffset;
     }
 
     private Vector3 VerticalCameraOffset()
     {
         float normalizedFall = Mathf.InverseLerp(0.0f, -Player.MaxFallSpeed, _playerVelocityY);
-        float yOffset = Mathf.Lerp(0.0f, _maxFallYOffset, normalizedFall);
+        float yOffset = Mathf.Lerp(0.0f, MAX_FALL_Y_OFFSET, normalizedFall);
         _targetVerticalOffset = new Vector3(0.0f, yOffset, 0.0f);
-        _currentVerticalOffset = Vector3.Lerp(_currentVerticalOffset, _targetVerticalOffset, _offsetSmoothSpeed);
+        _currentVerticalOffset = Vector3.Lerp(_currentVerticalOffset, _targetVerticalOffset, OFFSET_SMOOTH_SPEED);
         return _currentVerticalOffset;
     }
 }

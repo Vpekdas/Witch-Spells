@@ -17,11 +17,12 @@ public class SpawnManager : MonoBehaviour
 
     private void SpawnEnemy(SpawnPoint spawnPoint)
     {
-        Enemy enemy = _enemyPooler.GetPoolerEnemy("Green Slime");
-        if (enemy != null)
+        GameObject enemyObj = _enemyPooler.GetPoolerEnemy(EnemyId.Slime);
+        if (enemyObj == null)
         {
-            enemy.Object.transform.position = spawnPoint.transform.position;
-            enemy.Object.SetActive(true);
+            return;
         }
+        enemyObj.transform.position = spawnPoint.transform.position;
+        enemyObj.SetActive(true);
     }
 }

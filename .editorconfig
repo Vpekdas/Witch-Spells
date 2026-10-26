@@ -5,7 +5,7 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-indent_style = tab
+indent_style = space
 indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
@@ -19,7 +19,7 @@ csharp_new_line_before_open_brace = all
 
 # Prefer explicit types for clarity
 csharp_style_var_for_built_in_types = false:suggestion
-csharp_style_var_when_type_is_apparent = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
 csharp_style_var_elsewhere = false:suggestion
 
 # Expression-bodied members – only for simple properties
@@ -83,16 +83,16 @@ dotnet_naming_rule.parameters_should_be_camelcase.severity = warning
 dotnet_naming_symbols.parameters.applicable_kinds = parameter
 dotnet_naming_style.camel_case.capitalization = camelCase
 
-# Constants – ALL_CAPS
-dotnet_naming_rule.constants_should_be_all_caps.symbols = constants
-dotnet_naming_rule.constants_should_be_all_caps.style = all_caps
-dotnet_naming_rule.constants_should_be_all_caps.severity = warning
+# Constants – k_PascalCase
+dotnet_naming_rule.constants_should_be_k_pascal.symbols = constants
+dotnet_naming_rule.constants_should_be_k_pascal.style = k_pascal
+dotnet_naming_rule.constants_should_be_k_pascal.severity = warning
 
 dotnet_naming_symbols.constants.applicable_kinds = field
 dotnet_naming_symbols.constants.required_modifiers = const
 
-dotnet_naming_style.all_caps.capitalization = all_upper
-dotnet_naming_style.all_caps.word_separator = _
+dotnet_naming_style.k_pascal.required_prefix = k_
+dotnet_naming_style.k_pascal.capitalization = PascalCase
 
 # Static fields – s_camelCase (optional Unity style)
 dotnet_naming_rule.static_fields_should_be_s_camel.symbols = static_fields

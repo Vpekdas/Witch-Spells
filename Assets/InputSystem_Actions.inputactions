@@ -88,7 +88,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "First Spell",
+                    "name": "Spell1",
                     "type": "Button",
                     "id": "fdfa1057-8a21-4e34-9bac-b7e0ed56b330",
                     "expectedControlType": "",
@@ -97,9 +97,27 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Shield",
+                    "name": "Spell2",
                     "type": "Button",
-                    "id": "760a6978-d455-4985-9c87-4e71794b1955",
+                    "id": "a58976ac-3ef6-4a27-b7d0-eb6a60e2b633",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Spell3",
+                    "type": "Button",
+                    "id": "e0bf6945-3383-4135-a8b9-d6babb2c83fd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Spell4",
+                    "type": "Button",
+                    "id": "c884c595-9bb3-478f-890f-497757adc458",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -499,18 +517,40 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "First Spell",
+                    "action": "Spell1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "884e490b-d218-434e-9ae4-23b2494edc3b",
-                    "path": "<Keyboard>/r",
+                    "id": "ecbc64ba-af35-449f-8931-cf8fe8102c32",
+                    "path": "<Keyboard>/2",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Shield",
+                    "action": "Spell2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "21e264b1-97c1-4542-b8cb-c238fba325ca",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Spell3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "acb892b7-b936-433c-a63a-2de617962ee5",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Spell4",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

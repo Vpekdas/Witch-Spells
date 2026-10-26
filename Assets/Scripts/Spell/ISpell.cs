@@ -1,7 +1,8 @@
 using UnityEngine;
 
-public enum SpellType
+public enum SpellId
 {
+    None,
     FireBall,
     Shield
 
@@ -9,10 +10,10 @@ public enum SpellType
 
 public interface ISpell
 {
-    SpellType Type { get; set; }
-    float Damage { get; set; }
-    Vector3 Position { get; set; }
-    Vector2 Direction { get; set; }
-    float Speed { get; set; }
-    Vector3 Scale { get; set; }
+    SpellId Id { get; }
+    float Damage { get; }
+    float Speed { get; }
+
+    void Cast(Vector3 position, Vector2 direction);
+    void ResetSpell();
 }

@@ -1,11 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Spell
-{
-    public GameObject Object;
-    public ISpell Type;
-};
+
 
 public class SpellPooler : MonoBehaviour
 {
@@ -13,8 +9,7 @@ public class SpellPooler : MonoBehaviour
     [SerializeField] private int _spellAmountPerType;
     [SerializeField] private GameObject[] _spellsType;
     public static SpellPooler s_Instance;
-    private Dictionary<SpellType, List<Spell>> _pooledSpells;
-
+    private Dictionary<SpellId, List<GameObject>> _pooledSpells;
     private void Awake()
     {
         if (s_Instance != null)
@@ -27,41 +22,42 @@ public class SpellPooler : MonoBehaviour
 
     private void Start()
     {
-        _pooledSpells = new Dictionary<SpellType, List<Spell>>();
-        for (int i = 0; i < _spellsType.Length; i++)
+        _pooledSpells = new();
+
+        foreach (GameObject prefab in _spellsType)
         {
-            SpellType spellTypeName = _spellsType[i].GetComponent<ISpell>().Type;
+            ISpell spellComponent = prefab.GetComponent<ISpell>();
+            SpellId id = spellComponent.Id;
 
-            if (!_pooledSpells.ContainsKey(spellTypeName))
-                _pooledSpells[spellTypeName] = new List<Spell>();
-
-            for (int j = 0; j < _spellAmountPerType; j++)
+            if (!_pooledSpells.ContainsKey(id))
             {
-                GameObject spellObj = Instantiate(_spellsType[i]);
-                spellObj.SetActive(false);
-                spellObj.transform.SetParent(transform);
+                _pooledSpells[id] = new List<GameObject>();
+            }
 
-                ISpell spellType = spellObj.GetComponent<ISpell>();
-                Spell spell = new()
-                {
-                    Object = spellObj,
-                    Type = spellType,
-                };
-                _pooledSpells[spellTypeName].Add(spell);
+            for (int i = 0; i < _spellAmountPerType; i++)
+            {
+                GameObject obj = Instantiate(prefab, transform);
+                obj.SetActive(false);
+                _pooledSpells[id].Add(obj);
             }
         }
     }
 
-    public Spell GetPoolerSpell(SpellType spellType)
+    public GameObject GetPoolerSpell(SpellId id)
     {
-        if (_pooledSpells.TryGetValue(spellType, out List<Spell> spells))
+        if (!_pooledSpells.TryGetValue(id, out List<GameObject> list))
         {
-            foreach (Spell spell in spells)
+            return null;
+        }
+
+        foreach (GameObject obj in list)
+        {
+            if (!obj.activeInHierarchy)
             {
-                if (!spell.Object.activeInHierarchy)
-                    return spell;
+                return obj;
             }
         }
+
         return null;
     }
 }

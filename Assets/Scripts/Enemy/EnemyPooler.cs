@@ -1,18 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy
-{
-    public GameObject Object;
-    public IEnemy Type;
-};
-
 public class EnemyPooler : MonoBehaviour
 {
-    [SerializeField] private int _enemyAmountPerType;
-    [SerializeField] private GameObject[] _enemyType;
     public static EnemyPooler s_Instance;
-    private Dictionary<string, List<Enemy>> _pooledEnemy;
+    [SerializeField] private int _enemyAmount;
+    [SerializeField] private GameObject[] _enemyPrefabs;
+    private Dictionary<EnemyId, List<GameObject>> _pooledEnemy;
+
 
     private void Awake()
     {
@@ -26,43 +21,43 @@ public class EnemyPooler : MonoBehaviour
 
     private void Start()
     {
-        _pooledEnemy = new Dictionary<string, List<Enemy>>();
-        for (int i = 0; i < _enemyType.Length; i++)
+        _pooledEnemy = new();
+
+        foreach (GameObject prefab in _enemyPrefabs)
         {
-            string enemyTypeName = _enemyType[i].GetComponent<IEnemy>().Type;
+            EnemyController enemyComponent = prefab.GetComponent<EnemyController>();
+            EnemyId id = enemyComponent.Id;
 
-            if (!_pooledEnemy.ContainsKey(enemyTypeName))
-                _pooledEnemy[enemyTypeName] = new List<Enemy>();
-
-            for (int j = 0; j < _enemyAmountPerType; j++)
+            if (!_pooledEnemy.ContainsKey(id))
             {
-                GameObject enemyObj = Instantiate(_enemyType[i]);
-                enemyObj.SetActive(false);
-                enemyObj.transform.SetParent(transform);
+                _pooledEnemy[id] = new List<GameObject>();
+            }
 
-                IEnemy enemyType = enemyObj.GetComponent<IEnemy>();
-                Enemy enemy = new()
-                {
-                    Object = enemyObj,
-                    Type = enemyType,
-                };
-                _pooledEnemy[enemyTypeName].Add(enemy);
+            for (int i = 0; i < _enemyAmount; i++)
+            {
+                GameObject obj = Instantiate(prefab, transform);
+                obj.SetActive(false);
+                _pooledEnemy[id].Add(obj);
             }
         }
     }
 
-    public Enemy GetPoolerEnemy(string enemyType)
+    public GameObject GetPoolerEnemy(EnemyId id)
     {
-        if (_pooledEnemy.TryGetValue(enemyType, out List<Enemy> enemies))
+        if (!_pooledEnemy.TryGetValue(id, out List<GameObject> list))
         {
-            foreach (Enemy enemy in enemies)
+            return null;
+        }
+
+        foreach (GameObject obj in list)
+        {
+            if (!obj.activeInHierarchy)
             {
-                if (!enemy.Object.activeInHierarchy)
-                {
-                    return enemy;
-                }
+                return obj;
             }
         }
         return null;
     }
 }
+
+
